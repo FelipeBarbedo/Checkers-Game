@@ -76,6 +76,26 @@ Move* get_valid_moves(int** board, int player, int* num_moves)
 	return valid_moves;
 }
 
+void make_move(int** board, Move move, Move* valid_moves, int num_moves)
+{
+
+	for (int i = 0; i < num_moves; i++)
+	{
+		if (move.source_row == valid_moves[i].source_row && 
+			move.source_col == valid_moves[i].source_col)
+		{
+			if (move.target_row == valid_moves[i].target_row && 
+			move.target_col == valid_moves[i].target_col)
+			{
+				board[move.target_row][move.target_col] = board[move.source_row][move.source_col];
+				board[move.source_row][move.source_col] = 0;
+			}
+		}
+	}
+
+	
+}
+
 int** create_board()
 {
 	int** board = (int**)malloc(BOARD_SIZE * sizeof(int*));
@@ -155,12 +175,31 @@ void print_board(int** board)
 int main()
 {
 	int** board = create_board();
-	int player = 2;
+	int player = 1;
 	int num_moves;
 
-	Move* valid_moves = get_valid_moves(board, player, &num_moves);
+	Move* valid_moves;
+	Move move;
 
-	for (int i = 0; i< num_moves; i++)
+	valid_moves = get_valid_moves(board, player, &num_moves);
+		
+
+	move.source_row = 2;
+	move.source_col = 1;
+	move.target_row = 3;
+	move.target_col = 0;
+
+	/*for (int i = 0; i < num_moves; i++)
+	{
+		printf("Move %d: (%d, %d) -> (%d, %d)\n", i + 1, valid_moves[i].source_row,
+			valid_moves[i].source_col, valid_moves[i].target_row, valid_moves[i].target_col);
+	}*/
+
+	make_move(board, move, valid_moves, num_moves);
+
+	valid_moves = get_valid_moves(board, player, &num_moves);
+
+	for (int i = 0; i < num_moves; i++)
 	{
 		printf("Move %d: (%d, %d) -> (%d, %d)\n", i + 1, valid_moves[i].source_row,
 			valid_moves[i].source_col, valid_moves[i].target_row, valid_moves[i].target_col);
