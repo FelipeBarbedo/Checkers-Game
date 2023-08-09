@@ -18,6 +18,8 @@ typedef struct
 
 int** create_board();
 
+int** copy_board(int** board, int** aux_board);
+
 void free_board(int** board);
 
 void print_board(int** board);
@@ -42,189 +44,66 @@ void free_valid_moves(Move* valid_moves);
 
 void make_move(int** board, Move move, Move* valid_moves, int num_moves);
 
-void undo_move(int** board, Move move)
-{
-	//int player = board[move.source_row][move.source_col];
+int evaluate_board(int** board);
 
-	/*if (player == 1)
-	{
-		if ((move.source_row - move.target_row) == 2 && 
-			(move.source_col - move.target_col) == -2)
-		{
-			board[move.source_row + 1][move.source_col - 1] = player;
-		}
+int minimax(int** board, int depth, int maximizingPlayer, int alpha, int beta);
 
-		if ((move.source_row - move.target_row) == 2 && 
-			(move.source_col - move.target_col) == 2)
-		{
-			board[move.source_row + 1][move.source_col + 1] = player;
-		}
-	}
-
-	if (player == 2)
-	{
-		if ((move.source_row - move.target_row) == -2 && 
-			(move.source_col - move.target_col) == -2)
-		{
-			board[move.source_row - 1][move.source_col - 1] = player;
-		}
-
-		if ((move.source_row - move.target_row) == -2 && 
-			(move.source_col - move.target_col) == 2)
-		{
-			board[move.source_row - 1][move.source_col + 1] = player;
-		}
-	}*/
-
-	board[move.source_row][move.source_col] = board[move.target_row][move.target_col];
-	board[move.target_row][move.target_col] = 0;
-}
-
-int evaluate_board(int** board)
-{
-	int robot_piece = 0;
-
-	for (int i = 0; i < BOARD_SIZE; i++)
-		for (int j = 0; j < BOARD_SIZE; j++)
-		{
-			if (board[i][j] == 2)
-			{
-				robot_piece++;
-			}
-		}
-
-	return robot_piece;
-}
-
-int minimax(int** board, int depth, int maximizingPlayer, int alpha, int beta)
-{
-	if (depth == 0)
-	{
-		return evaluate_board(board);
-	}
-
-	if (maximizingPlayer)
-	{
-		int maxEval = INT_MIN;
-		int num_moves;
-
-		Move* valid_moves;
-
-		valid_moves = get_valid_moves(board, 2, &num_moves);
-
-		for (int i = 0; i < num_moves; i++)
-		{
-			make_move(board, valid_moves[i], valid_moves, num_moves);
-
-			int eval = minimax(board, depth - 1, 0, alpha, beta);
-
-			undo_move(board, valid_moves[i]);
-
-			maxEval = (eval > maxEval) ? eval : maxEval;
-
-			alpha = (alpha > maxEval) ? alpha : maxEval;
-
-			if (beta <= alpha)
-			{
-				break;
-			}
-		}
-
-		free_valid_moves(valid_moves);
-
-		return maxEval;
-
-	} else {
-		int minEval = INT_MAX;
-		int num_moves;
-
-		Move* valid_moves;
-
-		valid_moves = get_valid_moves(board, 1, &num_moves);
-
-		for (int i = 0; i < num_moves; i++)
-		{
-			make_move(board, valid_moves[i], valid_moves, num_moves);
-
-			int eval = minimax(board, depth - 1, 1, alpha, beta);
-
-			undo_move(board, valid_moves[i]);
-
-			minEval = (eval < minEval) ? eval : minEval;
-
-			beta = (beta < minEval) ? beta : minEval;
-
-			if (beta <= alpha)
-			{
-				break;
-			}
-		}
-
-		free_valid_moves(valid_moves);
-
-		return minEval;
-	}
-}
-
-void robot_move(int** board)
-{
-	int depth = 3;
-	int maximizingPlayer = 2;
-
-	int num_moves;
-
-	Move* valid_moves = get_valid_moves(board, maximizingPlayer, &num_moves);
-
-	int bestScore = INT_MIN;
-	int bestMoveIndex = -1;
-
-	for (int i = 0; i < num_moves; i++)
-	{
-		make_move(board, valid_moves[i], valid_moves, num_moves);
-
-		print_board(board); //2
-
-		int score = minimax(board, depth - 1, 0, INT_MIN, INT_MAX);
-
-		undo_move(board, valid_moves[i]);
-
-		
-
-		if (score > bestScore)
-		{
-			bestScore = score;
-			bestMoveIndex = i;
-		}
-	}
-
-	if (bestMoveIndex >= 0)
-	{
-		make_move(board, valid_moves[bestMoveIndex], valid_moves, num_moves);
-	}
-
-	free_valid_moves(valid_moves);
-}
+void robot_move(int** board);
 
 int main()
 {
 	int** board = create_board();
-	int player;
+	int player = 1;
 
 	int num_moves;
 	Move move;
 	Move* valid_moves;
 
-	player = 1;
-	print_board(board);
+	while (1)
+	{
+		printf("\ec");
+		print_board(board);
+		scanf("%d%d%d%d", &move.source_row, &move.source_col, &move.target_row, &move.target_col);
+	
+		valid_moves = get_valid_moves(board, player, &num_moves);
+		
+		make_move(board, move, valid_moves, num_moves);
+	
+		printf("\ec");
+		
+		print_board(board);
+	
+		robot_move(board);
+	
+		printf("\ec");
+		print_board(board);
 
+	}
+
+
+/*
 	valid_moves = get_valid_moves(board, player, &num_moves);
 	move.source_row = 2;
-	move.source_col = 1;
+	move.source_col = 3;
 	move.target_row = 3;
-	move.target_col = 2;
+	move.target_col = 4;
 	make_move(board, move, valid_moves, num_moves);
 
-	player = 2;
+	print_board(board);
+
+	robot_move(board);
+
+	print_board(board);
+
+	robot_move(board);
+
+	print_board(board);
+
+	robot_move(board);
+
+	print_board(board);
+
+/*	player = 2;
 	print_board(board);
 
 	valid_moves = get_valid_moves(board, player, &num_moves);
@@ -249,7 +128,7 @@ int main()
 	print_board(board);
 
 	valid_moves = get_valid_moves(board, player, &num_moves);
-/*
+
 	make_move(board, move, valid_moves, num_moves);
 
 	print_board(board);
@@ -305,6 +184,18 @@ int** create_board()
 		}
 
 	return board;
+}
+
+int** copy_board(int** board, int** aux_board)
+{
+
+	for (int i = 0; i < BOARD_SIZE; i++)
+		for(int j = 0; j < BOARD_SIZE; j++)
+		{
+			aux_board[i][j] = board[i][j];
+		}
+
+	return aux_board;
 }
 
 void free_board(int** board)
@@ -538,4 +429,129 @@ void make_move(int** board, Move move, Move* valid_moves, int num_moves)
 			}
 		}	
 	}
+}
+
+int evaluate_board(int** board)
+{
+	int robot_piece = 0;
+
+	for (int i = 0; i < BOARD_SIZE; i++)
+		for (int j = 0; j < BOARD_SIZE; j++)
+			if (board[i][j] == 2)
+				robot_piece++;
+
+	return robot_piece;
+}
+
+int minimax(int** board, int depth, int maximizingPlayer, int alpha, int beta)
+{
+	int** aux_board = create_board();
+	aux_board = copy_board(board, aux_board);
+
+	if (depth == 0)
+	{
+		return evaluate_board(aux_board);
+	}
+
+	if (maximizingPlayer)
+	{
+		int maxEval = INT_MIN;
+		int num_moves;
+
+		Move* valid_moves;
+
+		valid_moves = get_valid_moves(aux_board, 2, &num_moves);
+
+		for (int i = 0; i < num_moves; i++)
+		{
+			make_move(aux_board, valid_moves[i], valid_moves, num_moves);
+
+			int eval = minimax(aux_board, depth - 1, 0, alpha, beta);
+
+			aux_board = copy_board(board, aux_board);
+
+			maxEval = (eval > maxEval) ? eval : maxEval;
+
+			alpha = (alpha > maxEval) ? alpha : maxEval;
+
+			if (beta <= alpha)
+			{
+				break;
+			}
+		}
+
+		free_board(aux_board);
+		free_valid_moves(valid_moves);
+
+		return maxEval;
+
+	} else {
+		int minEval = INT_MAX;
+		int num_moves;
+
+		Move* valid_moves;
+
+		valid_moves = get_valid_moves(aux_board, 1, &num_moves);
+
+		for (int i = 0; i < num_moves; i++)
+		{
+			make_move(aux_board, valid_moves[i], valid_moves, num_moves);
+
+			int eval = minimax(aux_board, depth - 1, 1, alpha, beta);
+
+			aux_board = copy_board(board, aux_board);
+
+			minEval = (eval < minEval) ? eval : minEval;
+
+			beta = (beta < minEval) ? beta : minEval;
+
+			if (beta <= alpha)
+			{
+				break;
+			}
+		}
+
+		free_board(aux_board);
+		free_valid_moves(valid_moves);
+
+		return minEval;
+	}
+}
+
+void robot_move(int** board)
+{
+	int** aux_board = create_board();
+	aux_board = copy_board(board, aux_board);
+
+	int depth = 3;
+	int maximizingPlayer = 2;
+	int num_moves;
+
+	Move* valid_moves = get_valid_moves(aux_board, maximizingPlayer, &num_moves);
+
+	int bestScore = INT_MIN;
+	int bestMoveIndex = -1;
+
+	for (int i = 0; i < num_moves; i++)
+	{
+		make_move(aux_board, valid_moves[i], valid_moves, num_moves);
+
+		int score = minimax(aux_board, depth - 1, 0, INT_MIN, INT_MAX);
+
+		aux_board = copy_board(board, aux_board);		
+
+		if (score > bestScore)
+		{
+			bestScore = score;
+			bestMoveIndex = i;
+		}
+	}
+
+	if (bestMoveIndex >= 0)
+	{
+		make_move(board, valid_moves[bestMoveIndex], valid_moves, num_moves);
+	}
+
+	free_board(aux_board);
+	free_valid_moves(valid_moves);
 }
